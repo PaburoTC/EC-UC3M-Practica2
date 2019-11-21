@@ -65,7 +65,7 @@
     },
     {
       "cell_type": "code",
-      "source": "",
+      "source": "# A = R4 = $4\n# BC = R5\n# DE = R6\n# HL = R7 = $v0\n# IX = R8 = $a0\n# IY = R9 = $a1\n.text\n\tsumav:\n\t\tpush $8\t\t#Push $a0\n\t\tpush $9\t\t#Push $a1\n\n\t\tldi $7 0\t#li $v0\n\n\t\tb1:\n\t\t\tldi $4 0\t#ponemos A a 0\n\t\t\tadd_a $8\t#A + v0\n\t\t\tjpz 36\t\t#PREGUNTAR EN CLASE SI ES LEGITIMO, comprobar si la suma es 0\n\t\t\tld $5 ($9)\t#ponemos R5 (PREGUNTAR SI R5 ES $t0) al valor de la posicion en memoria de R9\n\t\t\tld $4 $7\t#movemos a A v0\n\t\t\tadd_a $5\t#A + R5\n\t\t\tld $7 $4 \t#movemos a v0 A\n\t\t\tld $4 $9\t#movemos a A a1\n\t\t\taddi_a 4\t#A + 4\n\t\t\tld $9 $4\t#movemos a a1 A\n\t\t\tdec $8\t\t#a0 - 1\n\t\t\tjp -48\t\t#reiterar\n\t\tf1:\n\t\t\tpop $9\t\t#Pop $a1\n\t\t\tpop $8\t\t#Pop $a0\n\t\t\tret \t\t#RETURN\n\n\tmain:\n\t\tldi $8 10\n\t\tldi $9 vector\n\t\tcall sumav\n    halt\n\t\t",
       "outputs": [],
       "execution_count": 1,
       "metadata": {
@@ -83,7 +83,7 @@
     },
     {
       "cell_type": "code",
-      "source": "{\n  \"time\": 1574188804199,\n  \"title\": \"clock 54 @ &#181;address 0\",\n  \"title_short\": \"clock 54,<br>&#181;add 0\",\n  \"content\": \"register R4 = 0xa; register R8 = 0xa; register R9 = 0x1000; register R29 = 0xffff3; register PC = 0x8018; memory 0x1000 = 0x1; memory 0x1004 = 0x2; memory 0x1008 = 0x3; memory 0x100c = 0x4; memory 0x1010 = 0x5; memory 0x1014 = 0x6; memory 0x1018 = 0x7; memory 0x101c = 0x8; memory 0x1020 = 0x9; memory 0x1024 = 0xa; memory 0x8000 = 0x91000000; memory 0x8004 = 0x91200000; memory 0x8008 = 0x48e00000; memory 0x800c = 0x48800000; memory 0x8010 = 0x61000000; memory 0x8014 = 0xcc000024; memory 0x8018 = 0x4ca90000; memory 0x801c = 0x40870000; memory 0x8020 = 0x60a00000; memory 0x8024 = 0x40e40000; memory 0x8028 = 0x40890000; memory 0x802c = 0x68000004; memory 0x8030 = 0x41240000; memory 0x8034 = 0x75000000; memory 0x8038 = 0xc000ffd0; memory 0x803c = 0x95200000; memory 0x8040 = 0x95000000; memory 0x8044 = 0x88000000; memory 0x8048 = 0x4900000a; memory 0x804c = 0x49201000; memory 0x8050 = 0x84008000; memory 0x8054 = 0x8c000000; memory 0xffff0 = 0x1000; memory 0xffff4 = 0xa; memory 0xffff8 = 0x8054; \"\n}",
+      "source": "{\n  \"time\": 1574188341672,\n  \"title\": \"clock 54 @ &#181;address 0\",\n  \"title_short\": \"clock 54,<br>&#181;add 0\",\n  \"content\": \"register R4 = 0xa; register R8 = 0xa; register R9 = 0x1000; register R29 = 0xffff3; register PC = 0x8018; memory 0x1000 = 0x1; memory 0x1004 = 0x2; memory 0x1008 = 0x3; memory 0x100c = 0x4; memory 0x1010 = 0x5; memory 0x1014 = 0x6; memory 0x1018 = 0x7; memory 0x101c = 0x8; memory 0x1020 = 0x9; memory 0x1024 = 0xa; memory 0x8000 = 0x91000000; memory 0x8004 = 0x91200000; memory 0x8008 = 0x48e00000; memory 0x800c = 0x48800000; memory 0x8010 = 0x61000000; memory 0x8014 = 0xcc000024; memory 0x8018 = 0x4ca90000; memory 0x801c = 0x40870000; memory 0x8020 = 0x60a00000; memory 0x8024 = 0x40e40000; memory 0x8028 = 0x40890000; memory 0x802c = 0x68000004; memory 0x8030 = 0x41240000; memory 0x8034 = 0x75000000; memory 0x8038 = 0xc000ffd0; memory 0x803c = 0x95200000; memory 0x8040 = 0x95000000; memory 0x8044 = 0x88000000; memory 0x8048 = 0x4900000a; memory 0x804c = 0x49201000; memory 0x8050 = 0x84008000; memory 0x8054 = 0x8c000000; memory 0xffff0 = 0x1000; memory 0xffff4 = 0xa; memory 0xffff8 = 0x8054; \"\n}",
       "outputs": [],
       "execution_count": 1,
       "metadata": {
