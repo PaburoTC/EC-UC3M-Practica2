@@ -1,4 +1,10 @@
-begin {
+begin
+{
+    fetch:          (T2, C0),
+                    (TA, R, BW=11, M1=1, C1=1),
+                    (M2, C2, T1, C3),
+                    (A0, B=0, C=0)
+}
 
 ld reg1 reg2 
 {
@@ -82,7 +88,7 @@ jp val
 {
 	co=110000,
 	nwords=1,
-	val = inm(15,0),
+	val = address(15,0)rel,
 	{
 		(T2=1, C4=1),
 		(SE=1, OFFSET=0, SIZE=10000, T3=1, C5=1),
@@ -94,7 +100,7 @@ jpz val
 {
 	co=110011,
 	nwords=1,
-	val=inm(15,0),
+	val=address(15,0)rel,
 	{
 			(A0=0, B=1, C=110, MADDR=backfetch)
 			(T2=1, C4=1),
@@ -158,42 +164,18 @@ pop reg1
 	{
 		(SELA=11101, MR=1, T9=1, C0=1, MA=0, MB=10, MC=1, SELCOP=1010, C6=1),		
 		(TA=1, BW=11, R=1, M1=1, C1=1, SELC=11101, MR=1, T7=1, LC=1),		
-		(T1=1, SELC=10101, MR=0, LC=1, A0=1, B=1, C0=1)				
+		(T1=1, SELC=10101, MR=0, LC=1, A0=1, B=1, C=0)				
 	}
 }
 
 registers
 {
-	0=$zero,
-	1=$at,
-	2=$v0,
-	3=$v1,
-	4=$a0,
-	5=$a1,
-	6=$a2,
-	7=$a3,
-	8=$t0,
-	9=$t1,
-	10=$t2,
-	11=$t3,
-	12=$t4,
-	13=$t5,
-	14=$t6,
-	15=$t7,
-	16=$s0,
-	17=$s1,
-	18=$s2,
-	19=$s3,
-	20=$s4,
-	21=$s5,
-	22=$s6,
-	23=$s7,
-	24=$t8,
-	25=$t9,
-	26=$k0,
-	27=$k1,
-	28=$gp,
-	29=$sp (stack_pointer),
-	30=$fp,
-	31=$ra
+	0=$zero,	
+	4=A,
+	5=BC,
+	6=DE,
+	7=HL,
+	8=IX,
+	9=HL,
+	29=$sp (stack_pointer)
 }
