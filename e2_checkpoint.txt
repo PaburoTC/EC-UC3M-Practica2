@@ -1,0 +1,178 @@
+{
+  "metadata": {
+    "kernelspec": {
+      "name": "node_nteract",
+      "language": "javascript",
+      "display_name": "Node.js (nteract)"
+    },
+    "kernel_info": {
+      "name": "node_nteract"
+    },
+    "language_info": {
+      "name": "javascript",
+      "version": "8.2.1",
+      "mimetype": "application/javascript",
+      "file_extension": ".js"
+    },
+    "title": "WepSIM 2.0.11",
+    "nteract": {
+      "version": "nteract-on-jupyter@2.0.0"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "source": "## mode",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "ep",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "mode",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## firmware",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "begin\n{\n    fetch:          (T2, C0),\n                    (TA, R, BW=11, M1=1, C1=1),\n                    (M2, C2, T1, C3),\n                    (A0, B=0, C=0)\n}\n\nld reg1 reg2 \n{\n\tco=010000,\n\tnwords=1,\n\treg1 = reg(25,21),\n\treg2 = reg(20,16),\n\t{\n\t\t(MR=0, SELA=10000, SELC=10101, T9=1, LC=1, A0=1, B=1, C=0)\t#BR[RDEST]←BR[RORIG]\n\t}\n}\n\nldi reg val \n{\n\tco=010010,\n\tnwords=1,\n\treg = reg(25,21),\n\tval = inm(15,0),\n\t{\n\t\t(SIZE=1111, OFFSET=0, T3=1, MR=0, SELC=10101, LC=1, A0=1, B=1, C=0)\t#BR[RDEST]←U16\n\t}\n}\n\nld reg1 (reg2)\n{\n\tco=010011,\n\tnwords=1,\n\treg1=reg(25,21),\n\treg2=reg(20,16),\n\t{\n\t\t(MR=0, SELA=10000, T9=1, C0=1)\t\t\t\t\t\t\t\t\t#MAR←BR[RORIG]\n\t\t(TA=1, R=1, BW=11, M1=1, C1=1)\t\t\t\t\t\t\t\t\t#MBR←M[MAR]\n\t\t(MR=0, SELC=10101, T1=1, LC=1, A0=1, B=1, C=0)\t#BR[RDEST]←MBR\n\t}\n}\n\nadd_a reg\n{\n\tco=011000,\n\tnwords=1,\n\treg = reg(25,21),\n\t{\n\t\t(SELA=10101, MR=0, MA=0, MB=11, SELCOP=1100, MC=1, T6=1,C4=1),\t#RT1←BR[RORIG]\n\t\t(SELB=00100, MR=1, MA=1, MB=00, SELCOP=1010, MC=1, T6=1, SELC=00100, SELP=11, M7=1, C7=1, LC=1, A0=1, B=1, C=0)\t#BR[A]←RT1 + BR[A]\n\t}\n}\n\naddi_a val\n{\n\tco=011010,\n\tnwords=1,\n\tval=inm(15,0)\n\t{\n\t\t(SIZE=01111, OFFSET=00000, SE=1, T3=1, C5=1)\t#RT1←S16\n\t\t(MR=1, SELA=100, MB=01, MC=1, SELCOP=1010, T6=1, SELC=100, LC=1, SELP=11, M7=1, C7=1, A0=1, B=1, C=0) #BR[A]←RT1 + BR[A]\n\t}\n}\n\ninc reg \n{\n\tco=011100,\n\tnwords=1,\n\treg = reg(25,21),\n\t{\n\t\t(MR=0, SELA=10101, MA=0, MB=11, MC=1, SELCOP=1010, SELC=10101, SELP=11, M7=1, C7=1, LC=1, T6=1, A0=1, B=1, C=0)\t#BR[RDEST]←BR[RDEST] + 1\n\t\t\n\t}\n}\n\ndec reg\n{\n\tco=011101,\n\tnwords=1,\n\treg=reg(25,21),\n\t{\n\t\t(MR=0, SELA=10101, MA=0, MB=11, MC=1, SELCOP=1011, T6=1, SELC=10101, LC=1, SELP=11, M7=1, C7=1, A0=1, B=1, C=0)\t#BR[RDEST]←BR[RDEST - 1\n\t}\n}\n\njp val \n{\n\tco=110000,\n\tnwords=1,\n\tval = address(15,0)rel,\n\t{\n\t\t(T2=1, C4=1),\t\t\t#RT1←PC\n\t\t(SE=1, OFFSET=0, SIZE=10000, T3=1, C5=1),\t\t#RT2←S16(relativo a PC)\n\t\t(MA=1, MB=1, MC=1, SELCOP=1010, T6=1, C2=1, A0=1, B=1, C=0)\t\t#PC←RT1 + RT2\n\t}\n}\n\njpz val\n{\n\tco=110011,\n\tnwords=1,\n\tval=address(15,0)rel,\n\t{\n\t\t\t(A0=0, B=1, C=110, MADDR=backfetch)\t#IF (SR.Z == 1) microsalto a backfetch\n\t\t\t(T2=1, C4=1),\t#RT1←PC\n\t\t\t(SE=1, OFFSET=0, SIZE=10000, T3=1, C5=1), #RT2←S16\n\t\t\t(MA=1, MB=1, MC=1, SELCOP=1010, T6=1, C2=1, A0=1, B=1, C=0)\t#PC←RT1 + RT2\n\t\tbackfetch:\n\t\t\t(A0=1, B=1, C=0)\t#salto a fecth\n\t}\n}\n\ncall val \n{\n\tco=100001,\n\tnwords=1,\n\tval = inm(15,0),\n\t{\n\t\t(SELA=11101, MR=1, MA=0, MB=10, MC=1, SELCOP=1011, T6=1, SELC=11101, LC=1, C0=1)\t#SP←SP - 4, MAR←SP\n\t\t(T2=1, M1=0, C1=1),\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#MBR←PC\n\t\t(TA=1, BW=11, TD=1, W=1, SIZE=10000,OFFSET=0, T3=1, C2=1, A0=1, B=1, C=0)\t\t\t\t\t#M[MAR]←MBR, PC←U16\n\t}\n}\n\nret\n{\n\tco=100010,\n\tnwords=1,\n\t{\n\t\t(MR=1, SELA=11101, T9=1, C0=1, MA=0, MB=10, SELCOP=1010, MC=1, C6=1), #RT3←SP + 4, MAR←SP\n\t\t(TA=1, R=1, BW=11, M1=1, C1=1, T7=1, MR=1, SELC=11101, LC=1)\t\t\t\t\t#MBR←M[MAR], SP←RT3\n\t\t(T1=1, M2=0, C2=1, A0=1, B=1, C=0)\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#PC←MBR\n\t}\n}\n\nhalt \n{\n\tco=100011,\n\tnwords=1,\n\t{\n    (SELA=1, SELB=1, SELCOP=1011, MR=1, MC=1, T6=1, C2=1, A0=1, B=1, C=0)\t#PC←BR[1] - BR[1]\n    \n\t}\n}\n\npush reg\n{\n\tco=100100,\n\tnwords=1,\n\treg=reg(25,21),\n\t{\n\t\t(MR=1, SELA=11101, MA=0, MB=10, SELCOP=1011, MC=1, T6=1, SELC=11101, LC=1, C0=1)\t#SP←SP - 4, MAR←SP, \n\t\t(MR=0, SELA=10101, T9=1, M1=0, C1=1)\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#MBR←BR[RORIG]\n\t\t(TA=1, TD=1, W=1, BW=11, A0=1, B=1, C=0)\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#M[MAR]←MBR\n\t}\n}\n\npop reg1 \n{\n\tco=100101,\n\tnwords=1,\n\treg1 = reg(25,21),\n\t{\n\t\t(SELA=11101, MR=1, T9=1, C0=1, MA=0, MB=10, MC=1, SELCOP=1010, C6=1),\t#MAR←SP, RT3←SP + 4\n\t\t(TA=1, BW=11, R=1, M1=1, C1=1, SELC=11101, MR=1, T7=1, LC=1),\t\t\t\t\t#MBR←M[MAR], SP←RT3\t\n\t\t(T1=1, SELC=10101, MR=0, LC=1, A0=1, B=1, C=0)\t\t\t\t\t\t\t\t\t\t\t\t#RDEST←MBR\n\t}\n}\n\nregisters\n{\n\t0=$zero,\t\n\t4=A,\n\t5=BC,\n\t6=DE,\n\t7=HL,\n\t8=IX,\n\t9=IY,\n\t29=$sp (stack_pointer)\n}\n\n\n",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "firmware",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## assembly",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "# A = R4 = A\n# BC = R5\n# DE = R6\n# HL = R7 = $v0\n# IX = R8 = $a0\n# IY = R9 = $a1\n\n.data\n\tvector: .word 1, 2, 3, 4, 5, 6, 7, 8, 9, 10\n\n.text\n\tsumav:\n\t\tpush IX\t\t#Push $IX\n\t\tpush IY\t\t#Push $IY\n\n\t\tldi HL 0\t#li $HL\n\n\t\tb1:\n\t\t\tldi A 0\t\t\t#ponemos A a 0\n\t\t\tadd_a IX\t\t#A + v0\n\t\t\tjpz f1\t\t\t#Salto si SR[Z]==1\n\t\t\tld BC (IY)\t#ponemos BC al valor de la posicion en memoria a la que apunta IY\n\t\t\tld A HL\t\t\t#movemos HL a A\n\t\t\tadd_a BC\t\t#A + R5\n\t\t\tld HL A \t\t#movemos A a HL\n\t\t\tld A IY\t\t\t#movemos IY a A\n\t\t\taddi_a 4\t\t#A + 4\n\t\t\tld IY A\t\t\t#movemos A a IY\n\t\t\tdec IX\t\t\t#IX - 1\n\t\t\tjp b1\t\t\t\t#reiterar\n\t\tf1:\n\t\t\tpop IY\t\t\t#Pop $IY\n\t\t\tpop IX\t\t\t#Pop $IX\n\t\t\tret \t\t\t\t#RETURN\n\n\tmain:\n\t\tldi IX 10\t\t\t#Ponemos IX a 10\t\n\t\tldi IY vector\t#Ponemos IY a dir(vector)\n\t\tcall sumav\t\t#Llamamos a subrutina sumav\n\t\thalt\n\t\t\n\n\n\n\n\n\n\n\n\n",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "assembly",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## state_current",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+<<<<<<< HEAD
+      "source": "{\n  \"time\": 1575201423463,\n  \"title\": \"clock 1 @ &#181;address 0\",\n  \"title_short\": \"clock 1,<br>&#181;add 0\",\n  \"content\": \"register R29 = 0xfffff; register PC = 0x8048; memory 0x1000 = 0x1; memory 0x1004 = 0x2; memory 0x1008 = 0x3; memory 0x100c = 0x4; memory 0x1010 = 0x5; memory 0x1014 = 0x6; memory 0x1018 = 0x7; memory 0x101c = 0x8; memory 0x1020 = 0x9; memory 0x1024 = 0xa; memory 0x8000 = 0x91000000; memory 0x8004 = 0x91200000; memory 0x8008 = 0x48e00000; memory 0x800c = 0x48800000; memory 0x8010 = 0x61000000; memory 0x8014 = 0xcc000024; memory 0x8018 = 0x4ca90000; memory 0x801c = 0x40870000; memory 0x8020 = 0x60a00000; memory 0x8024 = 0x40e40000; memory 0x8028 = 0x40890000; memory 0x802c = 0x68000004; memory 0x8030 = 0x41240000; memory 0x8034 = 0x75000000; memory 0x8038 = 0xc000ffd0; memory 0x803c = 0x95200000; memory 0x8040 = 0x95000000; memory 0x8044 = 0x88000000; memory 0x8048 = 0x4900000a; memory 0x804c = 0x49201000; memory 0x8050 = 0x84008000; memory 0x8054 = 0x8c000000; \"\n}",
+=======
+      "source": "{\n  \"time\": 1574705505192,\n  \"title\": \"clock 762 @ &#181;address 0\",\n  \"title_short\": \"clock 762,<br>&#181;add 0\",\n  \"content\": \"register R5 = 0xa; register R7 = 0x37; register R8 = 0xa; register R9 = 0x1000; register R29 = 0xfffff; register SR = 0x10000000; memory 0x1000 = 0x1; memory 0x1004 = 0x2; memory 0x1008 = 0x3; memory 0x100c = 0x4; memory 0x1010 = 0x5; memory 0x1014 = 0x6; memory 0x1018 = 0x7; memory 0x101c = 0x8; memory 0x1020 = 0x9; memory 0x1024 = 0xa; memory 0x8000 = 0x91000000; memory 0x8004 = 0x91200000; memory 0x8008 = 0x48e00000; memory 0x800c = 0x48800000; memory 0x8010 = 0x61000000; memory 0x8014 = 0xcc000024; memory 0x8018 = 0x4ca90000; memory 0x801c = 0x40870000; memory 0x8020 = 0x60a00000; memory 0x8024 = 0x40e40000; memory 0x8028 = 0x40890000; memory 0x802c = 0x68000004; memory 0x8030 = 0x41240000; memory 0x8034 = 0x75000000; memory 0x8038 = 0xc000ffd0; memory 0x803c = 0x95200000; memory 0x8040 = 0x95000000; memory 0x8044 = 0x88000000; memory 0x8048 = 0x4900000a; memory 0x804c = 0x49201000; memory 0x8050 = 0x84008000; memory 0x8054 = 0x8c000000; memory 0xffff0 = 0x1000; memory 0xffff4 = 0xa; memory 0xffff8 = 0x8054; \"\n}",
+>>>>>>> 8a0d01dfa6692824105085d262c11a29b1b3683e
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "state_current",
+        "type": "object",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## state_history",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+<<<<<<< HEAD
+      "source": "[\n  {\n    \"time\": 1575201315972,\n    \"title\": \"clock 11 @ &#181;address 0\",\n    \"title_short\": \"clock 11,<br>&#181;add 0\",\n    \"content\": \"register R8 = 0xa; register R9 = 0x1000; register R29 = 0xfffff; register PC = 0x8050; memory 0x1000 = 0x1; memory 0x1004 = 0x2; memory 0x1008 = 0x3; memory 0x100c = 0x4; memory 0x1010 = 0x5; memory 0x1014 = 0x6; memory 0x1018 = 0x7; memory 0x101c = 0x8; memory 0x1020 = 0x9; memory 0x1024 = 0xa; memory 0x8000 = 0x91000000; memory 0x8004 = 0x91200000; memory 0x8008 = 0x48e00000; memory 0x800c = 0x48800000; memory 0x8010 = 0x61000000; memory 0x8014 = 0xcc000024; memory 0x8018 = 0x4ca90000; memory 0x801c = 0x40870000; memory 0x8020 = 0x60a00000; memory 0x8024 = 0x40e40000; memory 0x8028 = 0x40890000; memory 0x802c = 0x68000004; memory 0x8030 = 0x41240000; memory 0x8034 = 0x75000000; memory 0x8038 = 0xc000ffd0; memory 0x803c = 0x95200000; memory 0x8040 = 0x95000000; memory 0x8044 = 0x88000000; memory 0x8048 = 0x4900000a; memory 0x804c = 0x49201000; memory 0x8050 = 0x84008000; memory 0x8054 = 0x8c000000; \"\n  },\n  {\n    \"time\": 1575201331100,\n    \"title\": \"clock 762 @ &#181;address 0\",\n    \"title_short\": \"clock 762,<br>&#181;add 0\",\n    \"content\": \"register R5 = 0xa; register R7 = 0x37; register R8 = 0xa; register R9 = 0x1000; register R29 = 0xfffff; register SR = 0x10000000; memory 0x1000 = 0x1; memory 0x1004 = 0x2; memory 0x1008 = 0x3; memory 0x100c = 0x4; memory 0x1010 = 0x5; memory 0x1014 = 0x6; memory 0x1018 = 0x7; memory 0x101c = 0x8; memory 0x1020 = 0x9; memory 0x1024 = 0xa; memory 0x8000 = 0x91000000; memory 0x8004 = 0x91200000; memory 0x8008 = 0x48e00000; memory 0x800c = 0x48800000; memory 0x8010 = 0x61000000; memory 0x8014 = 0xcc000024; memory 0x8018 = 0x4ca90000; memory 0x801c = 0x40870000; memory 0x8020 = 0x60a00000; memory 0x8024 = 0x40e40000; memory 0x8028 = 0x40890000; memory 0x802c = 0x68000004; memory 0x8030 = 0x41240000; memory 0x8034 = 0x75000000; memory 0x8038 = 0xc000ffd0; memory 0x803c = 0x95200000; memory 0x8040 = 0x95000000; memory 0x8044 = 0x88000000; memory 0x8048 = 0x4900000a; memory 0x804c = 0x49201000; memory 0x8050 = 0x84008000; memory 0x8054 = 0x8c000000; memory 0xffff0 = 0x1000; memory 0xffff4 = 0xa; memory 0xffff8 = 0x8054; \"\n  }\n]",
+=======
+      "source": "[]",
+>>>>>>> 8a0d01dfa6692824105085d262c11a29b1b3683e
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "state_history",
+        "type": "object",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## record",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "[\n  {\n    \"timestamp\": 1616,\n    \"description\": \"Execute instruction\",\n    \"element\": \"wsweb_execution_instruction();\\n\"\n  },\n  {\n    \"timestamp\": 0,\n    \"description\": \"Click on UI element btn_next_instruction1\",\n    \"element\": \"simcore_record_glowing(\\\"#btn_next_instruction1\\\");\\n\"\n  },\n  {\n    \"timestamp\": 1258,\n    \"description\": \"Execute instruction\",\n    \"element\": \"wsweb_execution_instruction();\\n\"\n  },\n  {\n    \"timestamp\": 0,\n    \"description\": \"Click on UI element btn_next_instruction1\",\n    \"element\": \"simcore_record_glowing(\\\"#btn_next_instruction1\\\");\\n\"\n  },\n  {\n    \"timestamp\": 500,\n    \"description\": \"Show message with title \\\"<span class='inline-block text-truncate w-25'>Guardamos el estado del sistema antes de llamar a la rutina</span>\\\" and body \\\"<span class='inline-block text-truncate w-25'></span>\\\".\",\n    \"element\": \"wsweb_notifyuser_show(\\\"Guardamos el estado del sistema antes de llamar a la rutina\\\", \\\"\\\", \\\"5000\\\");\\n\"\n  },\n  {\n    \"timestamp\": 5000,\n    \"description\": \"Close message with title \\\"<span class='inline-block text-truncate w-25'>Guardamos el estado del sistema antes de llamar a la rutina</span>\\\".\",\n    \"element\": \"wsweb_notifyuser_hide();\\n\"\n  },\n  {\n    \"timestamp\": 0,\n    \"description\": \"Click on UI element dd1\",\n    \"element\": \"simcore_record_glowing(\\\"#dd1\\\");\\n\"\n  },\n  {\n    \"timestamp\": 811,\n    \"description\": \"Open state\",\n    \"element\": \"wsweb_dialogbox_open_state();\\n\"\n  },\n  {\n    \"timestamp\": 200,\n    \"description\": \"Close all notifications\",\n    \"element\": \"wepsim_notify_close();\\n\"\n  },\n  {\n    \"timestamp\": 3042,\n    \"description\": \"Close all notifications\",\n    \"element\": \"wepsim_notify_close();\\n\"\n  },\n  {\n    \"timestamp\": 4069,\n    \"description\": \"Close state\",\n    \"element\": \"wsweb_dialogbox_close_all();\\n\"\n  },\n  {\n    \"timestamp\": 1,\n    \"description\": \"Close states dialogbox\",\n    \"element\": \"wsweb_dialogbox_close_state();\\n\"\n  },\n  {\n    \"timestamp\": 1773,\n    \"description\": \"Run\",\n    \"element\": \"wsweb_execution_run();\\n\"\n  },\n  {\n    \"timestamp\": 0,\n    \"description\": \"Click on UI element btn_run_stop\",\n    \"element\": \"simcore_record_glowing(\\\"#btn_run_stop\\\");\\n\"\n  },\n  {\n    \"timestamp\": 2482,\n    \"description\": \"Close execution summary\",\n    \"element\": \"wsweb_dialogbox_close_all();\\n\"\n  },\n  {\n    \"timestamp\": 500,\n    \"description\": \"Show message with title \\\"<span class='inline-block text-truncate w-25'>Guardamos el estado final del sistema tras ejecutar la rutina</span>\\\" and body \\\"<span class='inline-block text-truncate w-25'></span>\\\".\",\n    \"element\": \"wsweb_notifyuser_show(\\\"Guardamos el estado final del sistema tras ejecutar la rutina\\\", \\\"\\\", \\\"5000\\\");\\n\"\n  },\n  {\n    \"timestamp\": 5000,\n    \"description\": \"Close message with title \\\"<span class='inline-block text-truncate w-25'>Guardamos el estado final del sistema tras ejecutar la rutina</span>\\\".\",\n    \"element\": \"wsweb_notifyuser_hide();\\n\"\n  },\n  {\n    \"timestamp\": 0,\n    \"description\": \"Click on UI element dd1\",\n    \"element\": \"simcore_record_glowing(\\\"#dd1\\\");\\n\"\n  },\n  {\n    \"timestamp\": 1354,\n    \"description\": \"Open state\",\n    \"element\": \"wsweb_dialogbox_open_state();\\n\"\n  },\n  {\n    \"timestamp\": 181,\n    \"description\": \"Close all notifications\",\n    \"element\": \"wepsim_notify_close();\\n\"\n  },\n  {\n    \"timestamp\": 3851,\n    \"description\": \"Close all notifications\",\n    \"element\": \"wepsim_notify_close();\\n\"\n  },\n  {\n    \"timestamp\": 9943,\n    \"description\": \"Close state\",\n    \"element\": \"wsweb_dialogbox_close_all();\\n\"\n  },\n  {\n    \"timestamp\": 1,\n    \"description\": \"Close states dialogbox\",\n    \"element\": \"wsweb_dialogbox_close_state();\\n\"\n  },\n  {\n    \"timestamp\": 500,\n    \"description\": \"Show message with title \\\"<span class='inline-block text-truncate w-25'>Tras comparar los estados vemos que todo se ha ejecutado correctamente</span>\\\" and body \\\"<span class='inline-block text-truncate w-25'></span>\\\".\",\n    \"element\": \"wsweb_notifyuser_show(\\\"Tras comparar los estados vemos que todo se ha ejecutado correctamente\\\", \\\"\\\", \\\"5000\\\");\\n\"\n  },\n  {\n    \"timestamp\": 5000,\n    \"description\": \"Close message with title \\\"<span class='inline-block text-truncate w-25'>Tras comparar los estados vemos que todo se ha ejecutado correctamente</span>\\\".\",\n    \"element\": \"wsweb_notifyuser_hide();\\n\"\n  }\n]",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "record",
+        "type": "object",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## tag",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "tag",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## notify",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "true",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "notify",
+        "type": "boolean",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    }
+  ]
+}
