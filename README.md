@@ -5,4 +5,4 @@ El siguiente simulador de ensamblador fue usado para el desarrollo de la prácti
 
 ## Autores
 - Fernando Bermúdez Albarrán
-- Pablo T. Campos - burned301
+- Pablo T. Campos - [burned301](https://github.com/burned301)
